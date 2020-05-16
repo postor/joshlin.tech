@@ -19,8 +19,6 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
    
-      
-
     - name: Checkout submodules
       run: git clone --recurse-submodules https://github.com/postor/joshlin.tech.git .
 
@@ -34,7 +32,7 @@ jobs:
         node-version: '12'
     
     - name: install postcss-cli
-      run: npm install -g postcss-cli
+      run: npm install -g postcss-cli && npm install autoprefixer && npm audit fix
     
     - name: Build
       run: hugo --minify
