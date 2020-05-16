@@ -19,6 +19,7 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      
 
     - name: Checkout submodules
       shell: bash
@@ -36,7 +37,7 @@ jobs:
         extended: true
 
     - name: Build
-      run: hugo --minify
+      run: ls themes\docsy\assets\vendor\bootstrap\scss && hugo --minify
 
     - name: Deploy static to Tencent CloudBase
       id: deployStatic
