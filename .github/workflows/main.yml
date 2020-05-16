@@ -37,7 +37,7 @@ jobs:
         extended: true
 
     - name: Build
-      run: ls themes\docsy\assets\vendor\bootstrap\scss && hugo --minify
+      run: ls themes/docsy/assets/vendor/bootstrap/scss && hugo --minify
 
     - name: Deploy static to Tencent CloudBase
       id: deployStatic
