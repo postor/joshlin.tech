@@ -22,7 +22,6 @@ jobs:
       
 
     - name: Checkout submodules
-      shell: bash
       run: git clone --recurse-submodules https://github.com/postor/joshlin.tech.git .
 
     - name: Setup Hugo
@@ -30,7 +29,13 @@ jobs:
       with:
         hugo-version: '0.69.2'
         extended: true
-
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12'
+    
+    - name: install postcss-cli
+      run: npm install -g postcss-cli
+    
     - name: Build
       run: hugo --minify
 
