@@ -1,27 +1,24 @@
 ---
-title: "Router"
+title: "Router（路由）"
 weight: 4
 description: >
-  Bridge between triggers and functions
+  触发器和函数之间的桥梁
 ---
 
-# Brief Intro
+# 简介
 
-The router forwards HTTP requests to function pods. If there's no
-running service for a function, it requests one from executor, while
-holding on to the request; the router will forward the request to 
-the pod once the function service is ready.
+路由把 HTTP 请求转发到函数 Pod。如果一个函数没有正在运行的服务，它从执行器请求一个，并暂持这个请求；
+路由器会在函数服务准备好后把请求转发过去。
 
-The router is the only stateless component and can be scaled up if needed, according to
-load.
+路由是唯一的无状态并可以按负荷所需扩容的组件。
 
-# Diagram
+# 图解
 
-{{< img "../assets/router.png" "Fig.1 Router" "45em" "1" >}}
+{{< img "../assets/router.png" "Fig.1 路由" "45em" "1" >}}
 
-1. Client sends requests to a specific URL on the Router.
-2. Router returns 404 if there is no matching HTTP Trigger exists. </br>
-If a trigger exists, then check whether the function service record exists in cache. </br>
-If cache hits, go to step 4; otherwise, go to step 3.
-3. Ask Executor to provide the service address of the Function.
-4. Router redirects requests to the address just returned.
+1. 客户端发送请求到路由上指定的 URL。
+2. 如果没有匹配的 HTTP 触发器存在路由返回 404。</br>
+如果存在触发器，则检查缓存中是否有函数服务记录。 </br>
+如果函数记录存在，转到步骤 4 ；否则转到步骤 3。
+3. 请求执行器提供函数的服务地址。
+4. 路由重定向请求到返回的地址。

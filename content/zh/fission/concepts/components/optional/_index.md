@@ -1,6 +1,6 @@
 ---
-title: "Optional"
+title: "可选"
 weight: 1
 description: >
-  Optional components in details
+  可选组件详情
 ---

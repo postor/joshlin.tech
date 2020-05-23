@@ -1,31 +1,31 @@
 ---
-title: "Function Pod"
+title: "函数 Pod"
 weight: 5
 description: >
-  Place to load and execute the user function
+  加载和执行用户函数的地方
 ---
 
-# Brief Intro
+# 简介
 
-Function Pod is for serving HTTP requests from the clients. It contains two 
+函数 Pod 是用来处理客户端 HTTP 请求的。它包含两个容器：获取器和环境容器
 containers: Fetcher and Environment Container. 
 
-# Diagram
+# 图解
 
-{{< img "../assets/function-pod.png" "Fig.1 Function Pod" "50em" "1" >}}
+{{< img "../assets/function-pod.png" "Fig.1 函数 Pod" "50em" "1" >}}
 
-1. Fetcher gets the function information from the CRD.
-2. Pull the deployment archive from the StorageSvc.
-3. Save the archive to the shared volume.
-4. Call the specialized endpoint on the environment container to start function specialization.
-5. Environment Container loads the user function from the volume.
-6. Start serving the requests from Router.
+1. 获取器从自定义资源获取函数信息。
+2. 从 StorageSvc 拉取部署 archive。
+3. 保存 archive 到共享 volume。
+4. 调用指定的环境容器的地址来启动函数配置。
+5. 环境容器加载从 volume 用户函数。
+6. 开始服务来自路由的请求。
 
-# Environment Container
-Environment Container runs user-defined functions and is language-specific. 
-Each environment container must contain an HTTP server and a loader for functions.
+# 环境容器
 
-# Fetcher
+环境容器运行用户定义的函数并且是语言相关的。 
+每个环境容器必须包含一个 HTTP 服务和一个函数加载器。
 
-Fetcher is responsible to pull deployment archive from the StorageSvc and verify the checksum
-of file to ensure the integrity of file.
+# 获取器
+
+获取器负责从 StorageSvc 拉取部署 archive 并验证检查和以保证文件完整性。

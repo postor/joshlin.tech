@@ -1,5 +1,5 @@
 ---
-title: "Executor"
+title: "Executor（执行器）"
 weight: 3
 description: >
   Component to spin up function pods
@@ -7,141 +7,115 @@ description: >
 
 # Brief Intro
 
-Executor is the component to spin up function pods for functions. When Router receives 
-requests to a function, it checks whether a function service record exists in its cache. 
-If cache misses, the function service record was found or expired, it asks Executor to 
-provide a new one. Executor then retrieves function information from Kubernetes CRD and 
-invokes one of the executor types to spin up function pods. Once the function pods are up, 
-a function service record that contains the address of a service/pod will be returned.
+执行器是用来给函数启动函数 Pod 用的。当路由收到一个函数的请求的时，它检查缓存中是否已经存在函数服务的记录。
+如果缓存中没有，函数服务记录未找到或已过期，它请求执行器提供一个新的。然后执行器从 Kubernetes 自定义资源中
+回溯函数信息并调用其中一个执行器类型来启动函数 Pod。一旦函数 Pod 启动好了，就会返回一个包含服务/Pod 地址的函数服务
+记录
 
-Fission now supports two different executor types:
+Fission 目前支持两种类型的执行器：
 
-* PoolManager
-* NewDeploy
+* PoolManager（资源池管理器）
+* NewDeploy（新部署）
 
-These two executor types have different strategies to launch, specialize, and manage pod(s).
-You should choose one of the executor types wisely based on the scenario.
+这两种执行器类型使用不同的策略来启动，配置和管理 Pod。你需要基于场景做出明智的选择。
 
-# Diagram
+# 图解
 
-{{< img "../assets/executor.png" "Fig.1 Executor" "40em" "1" >}}
+{{< img "../assets/executor.png" "Fig.1 执行器" "40em" "1" >}}
 
-1. Router asks the service address of a function.
-2. Executor retrieves function information from CRD, and invokes one of executor type to get the address. 
+1. 路由寻分一个函数的服务地址
+2. 执行器从自定义资源回溯函数信息，并启动一个执行器类型来获取地址。
 
-# Executor Type
+# 执行器类型
 
-## PoolManager 
+## PoolManager（资源池管理器）
 
-PoolManager manages **pools of generic containers** and function containers.
+资源池管理器管理 **许多通用容器的池子** 和函数容器
 
-It watches the environment CRD changes and eagerly creates `generic pools
-for environments`. The pool size of initial "warm" containers can be 
-configured based on user needs. **Resource requirements are specified at 
-environment level and are inherited by specialized function pods**.
+它监视环境自定义资源变化并预先创建“对应环境的通用资源池”。初始的“热”资源池大小可由用户基于需要配置。
+**资源需求在环境级别配置，并且被特定的函数 Pod 继承**。
 
-The environment container runs in a pod with the `fetcher` container. 
-Fetcher is a straightforward utility that downloads a URL sent to it 
-and saves it at a configured location (shared volume).
+函数容器在一个 `fetcher`（获取器）容器的 Pod 中运行。 获取器是一个下载接收到 URL 并保存到指定位置
+（共享 volume）的简单工具。
 
-The implementation chooses a generic pod from the pool, relabels it to
-"orphan". The PoolManager invokes fetcher to copy the function 
-into the pod and hit the specialize endpoint on the environment container. 
-This causes the function to be loaded. The pod is now specific to that 
-function and is used for subsequent requests for that function. If there are 
-no more requests for a certain idle duration, then this pod is cleaned up. 
-If a new requests come after the earlier specialized pod was cleaned up, 
-then a new pod is specialised from the pool and used for execution.
+它的实现是从资源池选择一个通用 Pod，重新标签到 "orphan"（孤儿）。资源池管理器调用获取器来拷贝函数
+到 Pod 并触发环境容器的特定路径。这会触发加载函数。这个 Pod 现在就配置到了函数并且被用于接下来此
+函数的请求。如果经过指定的空闲时间没有收到请求的话，这个 Pod 会被清理。如果一个新的请求在前面所指
+定 Pod 被清理后到来，资源池的一个新 Pod 会被配置并用于执行。
 
-PoolManager is great for functions that are **short-living** and requires a **short 
-cold start time** [1].
+对于**短命**并且**冷启动时间短**[1]的函数而言资源池管理器是非常棒的选择。
 
-However, PoolManager has certain limitations. It selects only one pod per function, 
-which is not suitable for serving massive traffic. In such cases, you should consider
-using NewDeploy as executor type of function.
+然而，资源池管理器也有它的局限。它只每种函数只选择一个 Pod，这对于海量通信的服务而言是不合适的。
+在这种情况，你应当考虑使用新部署作为函数的执行器类型。
 
-[1] The cold start time depends on the package size of the function. If it's
-a snippet of code, the cold start time usually is less then 100ms.
+[1] 冷启动时间取决于函数包的大小。如果他只是一段代码，领启动时间通常少于 100ms。
 
-### Diagram
+### 图解
 
-{{< img "../assets/poolmanager.png" "Fig.2 PoolManager" "50em" "1" >}}
+{{< img "../assets/poolmanager.png" "Fig.2 PoolManager（资源池管理器）" "50em" "1" >}}
 
-1. PoolManager watches environment changes.
-2. It creates/deletes the pool when an environment is created/deleted. 
-3. Router asks the service address of a function.
-4. Executor retrieves function information from CRD
-5. Invoke PoolManager to spin up function pod.
-6. PoolManager selects a generic pod from the warm pool.
-7. Specialize the selected generic pod to make it a function pod.
-8. The service address is returned to the Router. In this case, the address is the IP of the pod.
-9. Router redirects requests to the address just returned.
+1. 资源池管理器监视环境变化。
+2. 当一个环境被创建/删除时它创建/删除资源池。
+3. 路由询问函数的服务地址。
+4. 执行器从自定义资源回溯函数信息。
+5. 调用资源池管理器来启动一个函数 Pod。
+6. 资源池管理器从热的资源池中选择一个通用 Pod。
+7. 配置所选通用 Pod 使其成为函数 Pod。
+8. 路由收到服务地址。在这种情况下地址为 Pod 的 IP。
+9. 路由重将请求定向到刚刚收到的地址。
 
-## New-Deployment 
+## 新部署
 
-New-Deployment executor (referred to as NewDeploy) creates `a Kubernetes Deployment` along 
-with `a Service and HorizontalPodAutoscaler(HPA)` for function execution. 
 
-NewDeploy creates **a Kubernetes Deployment along with a Service and HorizontalPodAutoscaler(HPA)** 
-for function execution and make it suitable for functions that handle massive traffic.
+新部署执行器（前面提到的 NewDeploy）为函数执行创建 `一个 Kubernetes Deployment` 以及 
+`一个服务和 HorizontalPodAutoscaler（HPA）`
 
-This enables autoscaling of function pods and load balancing the requests between pods. 
-**Resource requirements can be specified at the function level and these requirements 
-override those specified in the environment.**
+NewDeploy 为函数执行创建 **一个 Kubernetes Deployment 以及一个服务和 HorizontalPodAutoscaler（HPA 自动扩容管理）**，
+并且使得他适于处理海量请求。
 
-NewDeploy will scale the replicas of a function deployment to the minimum feasible scale setting, 
-if the minimum scale setting of a function is greater than 0. The 'fetcher' inside the pod uses a URL 
-in the JSON payload, which is attached as a parameter to start fetcher, to download the 
-function package instead of waiting for calls from NewDeploy.
+这开启了函数 Pod 的自动扩容和请求的负载均衡。**资源需求可以在函数级别配置，而且这些需求会覆盖环境中的需求**。
 
-When a function experiences a traffic spike, the service helps to distribute the requests to 
-pods belonging to the function for better workload distribution and lower latency. Also, 
-the HPA scales the replicas of the deployment based on the conditions set by the user.
-If there are no requests for certain duration then the idle pods are cleaned up.
+如果函数的最小容量设置大于0，NewDeploy 会扩容函数部署集群到最小可行的容量设置。Pod 中的 '获取器' 使用启动参
+数 JSON 结构中的一个 URL 来下载函数包而不需要等待 NewDeploy 的请求。
+
+当一个函数经历一个高峰，服务会帮助分发请求到术语函数的 Pod 达到更好的负荷分布和更低的延时。而且，HPA 根据用户
+的条件设置扩容集群部署。如果指定空闲时间内没有请求那么空闲的 Pod 会被清理掉。
  
-This approach though increases the cold time of a function, but also makes NewDeploy 
-suitable for functions designed to **serve massive traffic**.
+这个方法虽然增加了冷启动的时间，但是同样使得 NewDeploy 更适合被设计用于**服务海量请求**的函数。
 
-For requests where latency requirements are stringent, a minscale greater than zero can be set. 
-This essentially keeps a minscale number of pods ready when you create a function. When the function 
-is invoked, there is no delay since the pod is already created. Also minscale ensures that the pods 
-are not cleaned up even if the function is idle. This is great for functions where lower latency is 
-more important than saving resource consumption when functions are idle.
+对于延迟要求严格的请求，可以设置一个大于 0 的最小容量（minscale）。这实际上在你创建函数的时候保持了最小容量的 Pods。
+当你调用函数的时候，因为 Pod 已经创建好了所以没有延迟。同时最小容量确保了即使函数空闲不被清理。对于函数空闲时间
+低延迟比节约资源更重要的函数这是非常高效的。
 
-### Diagram
+### 图解
 
 {{< img "../assets/newdeploy.png" "Fig.3 NewDeploy" "50em" "1" >}}
 
-1. Router asks the service address of a function.
-2. Executor retrieves function information from CRD
-3. Invoke NewDeploy to spin up function pods.
-4. NewDeploy creates three Kubernetes resources: Deployment, Service, HPA.
-5. The Service's address is returned to the Router.
-6. Router redirects requests to the address just returned.
-7. Service load balance requests to pods.
+1. 路由询问函数服务地址。
+2. 执行器从自定义资源回溯函数信息。
+3. 调用 NewDeploy 来启动函数 Pod。
+4. NewDeploy 创建三个 Kubernetes 资源：Deployment（部署）, Service（服务）, HPA（自动扩容管理）。
+5. 服务地址返回到路由。
+6. 路由重定向请求到刚刚返回的地址。
+7. 服务负载均衡请求到 Pod。
 
-# The latency vs. idle-cost tradeoff
+# 延迟 vs. 空闲费用 的选择
 
-The executors allow you as a user to decide between latency and a small idle cost trade-off. 
-Depending on the need you can choose one of the combinations which is optimal for your use 
-case. In future, a more intelligent dispatch mechanism will enable more complex combinations 
-of executors.
+执行器允许用户决定延迟和空闲费用的选择。基于需求你可以给你的使用场景选择一个最优的组合。在未来，一个更聪明的
+分派机制会开启更复杂的执行器组合。
 
-| Executor Type | Min Scale | Latency | Idle cost |
+| 执行器类型 | 最小容量 | 延迟 | 空闲费用 |
 |:--------------|:---------:|:-------:|:----------|
-|Newdeploy      |0          |High     |Very low, pods get cleaned up after idle time|
-|Newdeploy      |> 0         |Low      |Medium, min scale number of pods are always up|
-|Poolmgr        |0          |Low      |Low, pool of pods are always up|
+|Newdeploy      |0          |高     |非常低，当达到空闲时间后清理 Pod|
+|Newdeploy      |> 0         |低      |中等，最少维持最低容量的 Pod|
+|Poolmgr        |0          |低      |低，始终位置资源池的 Pod|
 
-# Autoscaling
+# 自动扩容
 
-The new deployment based executor provides autoscaling for functions based on CPU usage. In future 
-custom metrics will be also supported for scaling the functions. You can set the initial and maximum 
-CPU for a function and target CPU at which autoscaling will be triggered. Autoscaling is useful for 
-workloads where you expect intermittant spikes in workloads. It also enables optimal the usage of 
-resources to execute functions, by using a baseline capacity with minimum scale and ability to burst 
-up to maximum scale based on spikes in demand.
+基于执行器的新部署提供了基于 CPU 使用的函数自动扩容。在未来会支持自定义矩阵来扩容函数。你可以给一个函数设置初始和最大 CPU 负载
+并且指定要出发自动扩容的 CPU。自动扩容在间歇性峰值的负荷情况有用。同时，通过最小容量的基线和能够在峰值需要的时候突发到最大容量
+的能力，它能够通过优化运行函数使用的资源。
 
 {{% notice info %}}
-Learn more further usage/setup of **executor type** for functions, please see [here]({{% relref "../../../usage/executor.zh.md" %}}).
+了解更多函数**执行器类型**的使用/安装，请参考[这里]({{% relref "../../../usage/executor.zh.md" %}})。
 {{% /notice %}}

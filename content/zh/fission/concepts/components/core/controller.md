@@ -1,5 +1,5 @@
 ---
-title: "控制器"
+title: "Controller（控制器）"
 weight: 2
 description: >
   接收 REST API 请求并创建 Fission 资源

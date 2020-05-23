@@ -1,18 +1,17 @@
 ---
-title: "Timer"
+title: "Timer（计时器）"
 weight: 5
 description: >
-  Invoke functions periodically
+  周期的调用函数
 ---
 
-# Brief Intro
+# 简介
 
-The timer works like kubernetes CronJob but instead of creating a pod to do the task, 
-it sends a request to router to invoke the function. It's suitable for the background tasks that
-need to execute periodically.
+计时器工作方式和 kubernetes CronJob 类似但不同点在于计时器不像 CronJob 那样创建一个 Pod 来执行任务，而是
+发送一个请求到路由去调用函数。它适用于需要周期性执行的后台任务。
 
-# Diagram
+# 图解
 
-{{< img "../assets/timer.png" "Fig.1 Timer Trigger" "30em" "1" >}}
+{{< img "../assets/timer.png" "Fig.1 计时器触发器" "30em" "1" >}}
 
-1. If the schedule time arrived, Timer invokes the function defined.
+1. 如果到了计划的时间，计时器调用定义的函数。

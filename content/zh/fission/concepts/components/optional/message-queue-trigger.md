@@ -1,26 +1,24 @@
 ---
-title: "Message Queue Trigger"
+title: "消息队列触发器"
 weight: 4
 description: >
-  Subscribe topics and invoke functions
+  订阅主题并调用函数
 ---
 
-# Brief Intro
+# 简介
 
-A message queue trigger binds a message queue topic to a function:
-Events from that topic cause the function to be invoked with the
-message as the body of the request. The trigger may also contain a
-response topic: if specified, the function's output is sent to this
-response.
+一个消息队列触发器绑定一个消息队列主题到函数：
+来自此主题的事件触发函数以消息作为请求 body 调用。触发器同时包含一个响应主题：
+如果指定了响应主题，函数的输出会被发送到此主题。
 
-# Diagram
+# 图解
 
-{{< img "../assets/mqtrigger.png" "Fig.1 Message Queue Trigger" "45em" "1" >}}
+{{< img "../assets/mqtrigger.png" "Fig.1 消息队列触发器" "45em" "1" >}}
 
-1. Message Queue Trigger first subscribes to the topic defined by the user.
-2. Publisher, it can be a Fission function or external application, publishes messages to the subscribe topic.
-3. Trigger receives message from the message queue.
-4. Invoke function to get the response.
-5. (A) If it is 200 OK, the trigger publishes result to the response topic (if any). 
-6. (B) If there is any error or the state is not equal to 200 OK, the trigger publishes result to the error topic (if any). </br>
-Currently, only NATS and Kafka message queue triggers support error topic.
+1. 消息队列触发器首先订阅用户定义的主题。
+2. Publisher（发布器），它可以使一个 Fission 函数或外部应用，发布消息到订阅的主题中。
+3. 触发器从队列中收到消息。
+4. 调用函数并获取响应结果。
+5. (A) 如果是 200 OK，则触发器发布结果到响应主题（如果配置了的话）。
+6. (B) 如果发生错误或响应状态不是 200 OK，那么触发器发布结果到错误主题（如果配置了的话）。</br>
+当前，仅 NATS 和 Kafka 消息队列触发器支持错误主题。

@@ -2,21 +2,20 @@
 title: "Logger"
 weight: 2
 description: >
-  Record and persist function logs
+  记录并持久化函数日志
 ---
 
-# Brief Intro
+# 简介
 
-Logger is deployed as DaemonSet to help to forward function logs to a centralized 
-database service for log persistence. Currently, only InfluxDB is supported to store logs.
+日志被作为 DaemonSet 部署以便转发函数日志到一个中心化的数据服务来持久化。目前仅支持 InfluxDB 存储日志。
 
-# Diagram
+# 图解
 
 {{< img "../assets/logger.png" "Fig.1 Logger" "45em" "1" >}}
 
-1. Containers in the function pod write logs to docker log files.
-2. Logger watches pod creation/update events
-3. Create symlinks to the container logs if the pod runs on the same node. (Symlinks will be removed if the pods no longer exist.)
-4. Logger (`Fluentbit`) reads logs from symlinks.
-5. Logs are piped to InfluxDB to persist.
+1. 函数 Pod 中的容器向 docker 日志文件写入日志。
+2. Logger 监视 Pod 创建/删除 事件
+3. 如果 Pod 运行在同一个节点上则创建链接。（链接会在 Pod 消失时删除）。
+4. Logger （`Fluentbit`）从连接中读取日志。
+5. 日志被管道到 InfluxDB 持久化。
 

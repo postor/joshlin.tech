@@ -1,6 +1,6 @@
 ---
 title: "Fission"
-linkTitle: 文档
+linkTitle: Fission翻译
 weight: 20
 menu:
   main:

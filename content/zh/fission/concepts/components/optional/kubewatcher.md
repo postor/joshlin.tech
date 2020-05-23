@@ -2,26 +2,22 @@
 title: "KubeWatcher"
 weight: 3
 description: >
-  Hawkeye to watch resource changes in Kubernetes cluster
+  监视 Kubernetes 集群中资源变化的鹰眼
 ---
 
-# Brief Intro
+# 简介
 
-Kubewatcher watches the Kubernetes API and invokes functions
-associated with watches, sending the watch event to the function.
+Kubewatcher 监视 Kubernetes API 并调用和监视相对应的函数，发送监视时间到函数中。
 
-The controller keeps track of the user's requested watches and associated
-functions. Kubewatcher watches the API based on these requests; when
-a watch event occurs, it serializes the object and calls the function
-via the router.
+控制器保持跟踪用户请求的监视及其对应的函数。Kubewatcher 监视基于这些请求的 API；
+当一个监视事件发生的时候，它吧对象序列化并通过路由调用对应函数。
 
-While a few simple retries are done, there isn't yet a reliable
-message bus between Kubewatcher and the function. Work for this is
-tracked in issue #64.
+经过一些尝试，目前 Kubewatcher 和函数之间还没有一个可靠的消息通道。此项工作在
+事项 #64 上跟踪。
 
-# Diagram
+# 图解
 
-{{< img "../assets/kubewatcher.png" "Fig.1 KubeWatcher Trigger" "30em" "1" >}}
+{{< img "../assets/kubewatcher.png" "Fig.1 KubeWatcher 触发器" "30em" "1" >}}
 
-1. KubeWatcher watches the changes of the resource defined by the user.
-2. Invoke functions if anything changed.
+1. KubeWatcher 监视用户定义的资源变化。
+2. 如果发生辩护则调用函数。

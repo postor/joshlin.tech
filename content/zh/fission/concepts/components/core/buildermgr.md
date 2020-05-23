@@ -1,5 +1,5 @@
 ---
-title: "Builder Manager"
+title: "Builder Manager（构建管理器）"
 weight: 6
 description: >
   把源码编译到可运行的函数
