@@ -74,7 +74,7 @@ time_format_blog = "02.01.2006"
 # Everything below this are Site Params
 
 [params]
-copyright = "Copyright © 2020 JoshLin"
+copyright = "Copyright © 2020 JoshLin 粤ICP备20044012号-1"
 privacy_policy = ""
 github_repo = "https://github.com/postor"
 github_doc_repo = "https://github.com/postor/joshlin.tech"

@@ -1,36 +1,33 @@
 ---
-title: Advanced Setup
+title: 高级安装
 weight: 1
 description: >
-  Advanced setup guide for Fission installation 
+  Fission 的高级安装指引
 ---
 
-In this guide you will learn how to setup fission in order to serve heavy workloads on production systems.
+在本引导中你可以了解到如何为高负荷产线系统安装 fission
 
-# Define Correct Resource Request/Limits
+# 定义正确的资源请求/限制
 
-By default, there is no resource requests/limits setting for fission component pods. But it's always wise set them up 
-if you're trying to running any application on Kubernetes for production. We recommend that you run benchmarks to 
-simulate real traffic and setup resource request/limits of components accordingly.
+默认，fission 组件 pod 是没有请求/限制设置的。但如果你尝试在 Kubernetes 产线环境上运行任何程序，把它们设置好始终是明智的选择。
+我们推荐你运行基准测试来模拟真实的流量并响应的设置组件的请求/限制。
 
-You can get component pods resource usage by using the following command.
+你可以通过以下命令查看组件 Pod 的资源使用。
 
 ```bash
 $ kubectl -n fission top pod
 ```
 
-And follow the [guide](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) to setup components' deployment.
+接下来，配置组件部署的 [指引](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)。
 
-# Setup SSL/TLS for Functions
+# 给函数配置 SSL/TLS
 
-Since fission router is not responsible to handle the encrypted traffic to functions, you should put 
-fission routers behind any existing proxy solution like [NGINX](https://www.nginx.com/blog/nginx-ssl/), 
-[Caddy](https://caddyserver.com/) or [Ambassador](https://github.com/datawire/ambassador) that helps to handle SSL/TLS 
-connections. 
+由于 fission 路由并不负责处理加密的流量，你应当把 fission 路由放在一个已有的代理方案之后，比如 [NGINX](https://www.nginx.com/blog/nginx-ssl/)，[Caddy](https://caddyserver.com/) 或 [Ambassador](https://github.com/datawire/ambassador)
+这种能够处理 SSL/TLS 连接。
 
-You can also set up **Ingress with TLS termination** to expose functions, see [here]({{% relref "../usage/ingress/ingress-extra-settings.md" %}}#tls-ingresstls).
+你也可以通过配置 **TLS termination** 来暴露函数，查看 [这里]({{% relref "../usage/ingress/ingress-extra-settings.md" %}}#tls-ingresstls)
 
-# Router
+# 路由
 
 ## Create HPA for Router Service
 
